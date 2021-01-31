@@ -23,7 +23,7 @@ class Db():
     def saveDataframe(self,df, table_name):
         
         df.to_sql(table_name, self.conn, if_exists='append', index=False)
-        print(self.checkTableName(table_name))
+        #print(self.checkTableName(table_name))
     
     def closeConnection(self):
         self.conn.close()
