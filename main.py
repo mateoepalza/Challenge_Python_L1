@@ -1,23 +1,19 @@
 import os
 import pandas as pd
-import hashlib
-import datetime
 import webbrowser
-from src.Restful import Restful 
-from src.connection import Db
+
+from src.RapidapiService import RapidapiService
+from src.CountriesService import CountriesService
+from src.Db import Db
 
 def main():
-    
-    # Get the current time
-    time = getTime()
+
     # Get all the regions
     regions = getRegions()
     # Get all the cities with it's language
-    cities = getCities(regions.get('Region'), time)
-    # Generate the full dictionary
-    regions.update(cities)
+    cities = getCities(regions)
     # Generate the dataframe
-    df = createDataFrame(regions)
+    df = createDataFrame(cities)
     # show statistics
     sdf = statistics(df)
     # Display the dataframe as a HTML file
@@ -27,46 +23,29 @@ def main():
     # Save the dataframe in a JSON file
     datasetToJson(df)
 
-def getTime():
-    return datetime.datetime.utcnow()
-
 def getRegions():
-
-    regions = {"Region" : []}
-
-    obj =  Restful("https://restcountries-v1.p.rapidapi.com/")
-
-    result = obj.get("all",{
-        'x-rapidapi-key': "78199a9fedmsh47e0058d12e41dep1bf329jsn22e6e03e973b",
-        'x-rapidapi-host': "restcountries-v1.p.rapidapi.com"}
-        )
-
-    # Get the regions
-    for country in result:
-        if str.lower(country.get('region')) not in regions.get("Region") and country.get('region') != "":
-            regions.get("Region").append(str.lower(country.get('region')))
-    
+    # Create the service's object
+    obj_regions = RapidapiService()
+    # Get all the regions
+    regions = obj_regions.getRegions()
     return regions
+    
 
-def getCities(regions, time):   
-    cities = {"city": [], "Language": [], "Time": []}
-    # Update the URL
-    obj = Restful("https://restcountries.eu/rest/v2/")
-
+def getCities(regions):   
+    data = {"Region": [], "City": [], "Language": [], "Time": []}
+    # Create Service's object
+    obj_countries =  CountriesService()
     # Get three cities
-    for region in regions:
+    for region in regions["Region"]:
+        # Get Country
+        response = obj_countries.getCountryByRegion(region, params={"fields":"name;languages"})
+        # Get the data
+        data["Region"].append(region)
+        data["City"].append(response["City"])
+        data["Language"].append(response["Language"])
+        data["Time"].append(float(response["Time"])+float(regions["Time"])) 
 
-        res = obj.get('region/'+region, params={"fields": "name;languages"})
-        if len(res) > 0:
-            # Select the first city
-            city = res[0]
-            # store the city inside the list
-            cities.get("city").append(city.get('name'))
-            #cities.get("Language").append(hashlib.new("hash", (city.get('languages')[0]).get('name').encode('utf-8')))
-            cities.get("Language").append((city.get('languages')[0]).get('name'))
-            cities.get("Time").append(float("{0:.3f}".format((datetime.datetime.utcnow() - time).total_seconds())))
-
-    return cities
+    return data
 
 def createDataFrame(data):
     # Generate the data frame using the dictionary
