@@ -20,8 +20,7 @@ class CountriesService():
         # store the city inside the list
         cities["City"] = city.get('name')
         # Get the language
-        #cities["Language"] = hashlib.new("hash",((city.get('languages')[0]).get('name')).encode("utf-8"))
-        cities["Language"] = (city.get('languages')[0]).get('name')
+        cities["Language"] = hashlib.sha1(((city.get('languages')[0]).get('name')).encode("utf-8")).hexdigest()
         # Get the time of the request
         cities["Time"] = response.elapsed.total_seconds()
 
