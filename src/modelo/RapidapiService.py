@@ -1,12 +1,16 @@
 import requests
+import os
+
+
 
 class RapidapiService():
 
     def __init__(self):
-        self.url = "https://restcountries-v1.p.rapidapi.com/"
+        self.url = os.getenv("RPDP_HOST")
         self.headers = {
-        'x-rapidapi-key': "78199a9fedmsh47e0058d12e41dep1bf329jsn22e6e03e973b",
-        'x-rapidapi-host': "restcountries-v1.p.rapidapi.com"}
+        'x-rapidapi-key': os.getenv("RPDP_KEY"),
+        'x-rapidapi-host': os.getenv("RPDP_HEADER")
+        }
 
     def getRegions(self, params={}):
 

@@ -2,9 +2,12 @@ import os
 import pandas as pd
 import webbrowser
 
-from src.RapidapiService import RapidapiService
-from src.CountriesService import CountriesService
-from src.Db import Db
+from src.modelo.RapidapiService import RapidapiService
+from src.modelo.CountriesService import CountriesService
+from src.modelo.Db import Db
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def main():
 
@@ -58,7 +61,7 @@ def statistics(df):
 
 def displayDataframe(df, sdf):
     # Get path of the file
-    dataframe_path = os.path.join(os.getcwd(), "src", "dataframe", "index.html")
+    dataframe_path = os.path.join(os.getcwd(), "src", "vista", "index.html")
     # Open the file
     f = open(dataframe_path,"w+")
     # Write the table's HTML
@@ -69,6 +72,8 @@ def displayDataframe(df, sdf):
     webbrowser.open(dataframe_path)
 
 def getHtml(df, sdf):
+
+    # Create the structure
     body = f"""
         <html>
             <head>
@@ -105,7 +110,8 @@ def saveDB(df):
 
 
 def datasetToJson(df):
-    df.to_json("JSON/dataframe.json")
+    # save as JSON
+    df.to_json("json/dataframe.json")
 
 if __name__ == "__main__":
     main()
